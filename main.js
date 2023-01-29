@@ -6,33 +6,70 @@ var app = http.createServer(function (request, response) {
   var _url = request.url;
   var queryData = url.parse(_url, true).query;
   var pathname = url.parse(_url, true).pathname;
-  var title = queryData.id;
   console.log(url.parse(_url, true));
 
   if (pathname === '/') {
-    fs.readFile(`data/${queryData.id}`, 'utf-8', function (err, description) {
-      var template = `
-      <!doctype html>
-      <html>
-      <head>
-      <title>WEB1 - ${title}</title>
-      <meta charset="utf-8">
-      </head>
-      <body>
-      <h1><a href="/">WEB</a></h1>
-      <ul>
-      <li><a href="/?id=HTML">HTML</a></li>
-      <li><a href="/?id=CSS">CSS</a></li>
-      <li><a href="/?id=JavaScript">JavaScript</a></li>
-      </ul>
-      <h2 style="margin:0;padding:0">${title}</h2>
-      <div style="margin:0;padding:0">${description}</div>
-      </body>
-      </html>
-      `;
-      response.writeHead(200);
-      response.end(template);
-    });
+    if (queryData.id === undefined) {
+      fs.readdir('./data', (err, filelist) => {
+        // console.log(filelist);
+        var title = 'WELCOME HOME';
+        var description = 'hello node.js';
+        var list = '<ul>';
+        var i = 0;
+        while (i < filelist.length) {
+          list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
+          i = i + 1;
+        }
+        list = list + '</ul>';
+        var template = `
+        <!doctype html>
+        <html>
+        <head>
+        <title>WEB1 - ${title}</title>
+        <meta charset="utf-8">
+        </head>
+        <body>
+        <h1><a href="/">WEB</a></h1>
+        ${list} 
+        <h2 style="margin:0;padding:0">${title}</h2>      
+        <div style="margin:0;padding:0">${description}</div>
+        </body>
+        </html>
+        `;
+        response.writeHead(200);
+        response.end(template);
+      });
+    } else {
+      fs.readFile(`data/${queryData.id}`, 'utf-8', function (err, description) {
+        fs.readdir('./data', (err, filelist) => {
+          var title = queryData.id;
+          var list = '<ul>';
+          var i = 0;
+          while (i < filelist.length) {
+            list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
+            i = i + 1;
+          }
+          list = list + '</ul>';
+          var template = `
+          <!doctype html>
+          <html>
+          <head>
+          <title>WEB1 - ${title}</title>
+          <meta charset="utf-8">
+          </head>
+          <body>
+          <h1><a href="/">WEB</a></h1>
+          ${list} 
+          <h2 style="margin:0;padding:0">${title}</h2>      
+          <div style="margin:0;padding:0">${description}</div>
+          </body>
+          </html>
+          `;
+          response.writeHead(200);
+          response.end(template);
+        });
+      });
+    }
   } else {
     //200은 전송 성공. 404은 실패
     response.writeHead(404);
