@@ -120,6 +120,49 @@ var app = http.createServer(function (request, response) {
       });
     });
     //파일형태로 저장하기
+  } else if (pathname === '/update') {
+    fs.readdir('./data/', function (error, filelist) {
+      fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description) {
+        var title = queryData.id;
+        var list = templateList(filelist);
+        var template = templateHTML(
+          title,
+          list,
+          `          
+          <style>*{font-family:inherit;width:100%;box-sizing:border-box}</style>
+          <form action="/update_process" method="post" style="max-width:300px;">
+          <input type="hidden" name="id" value="${title}">
+          /* submit했을때 목적지를 (어떤 파일을 수정할것인가) 알기위해서 수정하지않을 input[type="hidden"]을 하나 남긴다 */
+          <p><input type="text" name="title" placeholder="title" value="${title}"/></p>
+          <p>
+          <textarea rows="30" name="description" placeholder="description">${description}</textarea>
+          </p>
+          <p><input type="submit" value="제출" /></p>
+          </form>
+          `
+        );
+        response.writeHead(200);
+        response.end(template);
+      });
+    });
+  } else if (pathname === '/update_process') {
+    var body = '';
+    request.on('data', function (data) {
+      body = body + data;
+    });
+    request.on('end', function () {
+      var post = qs.parse(body);
+      var id = post.id;
+      var title = post.title;
+      var description = post.description;
+      // console.log(post);
+      fs.rename(`data/${id}`, `data/${title}`, function (error) {
+        fs.writeFile(`data/${title}`, description, 'utf8', function (error) {
+          response.writeHead(302, { Location: `/?id=${title}` });
+          response.end();
+        });
+      });
+    });
   } else {
     //200은 전송 성공. 404은 실패
     response.writeHead(404);
