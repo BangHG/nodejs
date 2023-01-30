@@ -14,4 +14,60 @@
     <h2>WEB gg</h2>
     <p>The World Wide Web (abbreviated WWW or the Web) is an information space where documents and other web resources are identified by Uniform Resource Locators (URLs), interlinked by hypertext links, and can be accessed via the Internet.[1] English scientist Tim Berners-Lee invented the World Wide Web in 1989. He wrote the first web browser computer program in 1990 while employed at CERN in Switzerland.[2][3] The Web browser was released outside of CERN in 1991, first to other research institutions starting in January 1991 and to the general public on the Internet in August 1991.</p>
   </body>
+
+  <script>
+    function timer(time) {
+      return new Promise(function (resolve) {
+        setTimeout(() => {
+          resolve(time);
+        }, time);
+      });
+    }
+
+    // timer(1000)
+    //   .then(function (time) {
+    //     console.log('start');
+    //     console.log(`이 코드는 ${time}ms 후에 실행됩니다`);
+    //     return timer(time + 500);
+    //   })
+    //   .then(function (time) {
+    //     console.log(`이 코드는 ${time}ms 후에 실행됩니다`);
+    //     return timer(time + 500);
+    //   })
+    //   .then(function (time) {
+    //     console.log(`이 코드는 ${time}ms 후에 실행됩니다`);
+    //     console.log('end');
+    //   });
+
+    // == 위 코드블럭과 아래는 내용이 같다.!
+
+    // ASYNC AWAIT. PROMISE 연습
+    async function run() {
+      console.log('시작');
+      var time = await timer(1000);
+      console.log(`이 코드는 ${time}ms 후에 실행됩니다`);
+      time = await timer(time + 500);
+      console.log(`이 코드는 ${time}ms 후에 실행됩니다`);
+      time = await timer(time + 500);
+      console.log(`이 코드는 ${time}ms 후에 실행됩니다`);
+      console.log(`끝`);
+
+      return time; //time을 반환해준다면??
+    }
+
+    async function runrun() {
+      console.log('부모 시작');
+      // await run();
+      var time = await run();
+      console.log(`타임은 ${time}`); //반환한 time을 출력
+
+      console.log('부모 끝');
+    }
+
+    // 더 할수 없다면 (aka async지옥) 프로미스로 또 연결해줄 수 있지롱..
+    console.log('조부모 시작');
+    runrun().then(function () {
+      console.log('조부모 끝');
+    });
+  </script>
 </html>

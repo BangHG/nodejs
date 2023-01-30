@@ -2,25 +2,21 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url'); // url모듈
 var qs = require('querystring');
-const { formatWithOptions } = require('util');
 
 function templateHTML(title, list, body, ctrl) {
   return `
   <!doctype html>
   <html>
-  <head>
-  <title>WEB - ${title}</title>
-  <meta charset="utf-8">
-  <style>
-  *{font-family:inherit;box-sizing:border-box}
-  html{font-family:'나눔스퀘어',Noto Sans KR ,'돋움', sans-serif;font-size:18px;word-break:keep-all;}  
-  </style>
-  </head>
-  <body>
-  <h1><a href="/">WEB</a></h1>
-  ${list}
-  ${body}
-  </body>
+    <head>
+      <title>WEB - ${title}</title>
+      <meta charset="utf-8">
+      <style> *{font-family:inherit;box-sizing:border-box} html{font-family:'나눔스퀘어',Noto Sans KR ,'돋움', sans-serif;font-size:18px;word-break:keep-all;} form input:not([type=hidden],[value="DELETE"]),form textarea{width:100%} </style>
+    </head>
+    <body>
+      <h1><a href="/">WEB</a></h1>
+      ${list}
+      ${body}
+    </body>
   </html>
   `;
 }
@@ -54,7 +50,6 @@ var app = http.createServer(function (request, response) {
           list,
           `<h2>${title}</h2>
           <div>${description}</div>
-
           <a href="/create">CREATE</a>
           `
         );
