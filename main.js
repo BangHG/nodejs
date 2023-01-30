@@ -2,8 +2,9 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url'); // url모듈
 var qs = require('querystring');
+const { formatWithOptions } = require('util');
 
-function templateHTML(title, list, body) {
+function templateHTML(title, list, body, ctrl) {
   return `
   <!doctype html>
   <html>
@@ -13,9 +14,9 @@ function templateHTML(title, list, body) {
   </head>
   <body>
   <h1><a href="/">WEB</a></h1>
-  ${list} 
+  ${list}
   ${body}
-  <a href="/create">create</a>
+
   </body>
   </html>
   `;
@@ -48,22 +49,28 @@ var app = http.createServer(function (request, response) {
         var template = templateHTML(
           title,
           list,
-          `<h2>${title}</h2>      
-          <div>${description}</div>`
+          `<h2>${title}</h2>
+          <div>${description}</div>
+         
+          <a href="/create">CREATE</a>
+          `
         );
         response.writeHead(200);
         response.end(template);
       });
     } else {
-      fs.readFile(`data/${queryData.id}`, 'utf-8', function (err, description) {
+      fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description) {
         fs.readdir('./data', (err, filelist) => {
           var title = queryData.id;
           var list = templateList(filelist);
           var template = templateHTML(
             title,
             list,
-            `<h2>${title}</h2>      
-            <div>${description}</div>`
+            `<h2>${title}</h2>
+            <div>${description}</div>
+            <a href="/create">CREATE</a>
+            <a href="/update?id=${title}">UPDATE</a>
+            `
           );
           response.writeHead(200);
           response.end(template);
@@ -73,8 +80,6 @@ var app = http.createServer(function (request, response) {
   } else if (pathname === '/create') {
     fs.readdir('./data', (err, filelist) => {
       var title = 'WEB - Create';
-      var description = 'create';
-
       var list = templateList(filelist);
 
       var template = templateHTML(
@@ -85,7 +90,7 @@ var app = http.createServer(function (request, response) {
         <form action="/process_create" method="post" style="max-width:300px;">
           <p><input type="text" name="title" placeholder="title"/></p>
           <p>
-            <textarea  name="description" placeholder="description" id="" cols="30" rows="10"></textarea>
+            <textarea rows="30" name="description" placeholder="description" ></textarea>
           </p>
           <p><input type="submit" value="제출" /></p>
         </form>
@@ -98,15 +103,23 @@ var app = http.createServer(function (request, response) {
     var body = '';
     request.on('data', function (data) {
       body = body + data;
-    }); //post로 전송되는 데이터가 많을것을 대비하여,. 콜백을 호출하여 데이터를 조각내어 수신한다
-    request.on('end', function () {
-      var post = qs.parse(body);
-      console.log(`title:${post.title}, desc: ${post.description}`);
-      //끝
     });
+    //post로 전송되는 데이터가 많을것을 대비하여,. 콜백을 호출하여 데이터를 조각내어 수신한다
+    request.on('end', function () {
+      //끝
+      var post = qs.parse(body);
+      var title = post.title;
+      var description = post.description;
 
-    response.writeHead(200);
-    response.end('did it');
+      //파일만들기!
+      fs.writeFile(`data/${title}`, description, 'utf8', function (err) {
+        // response.writeHead(200);
+        //만든 파일로 이동하기 : 리다이렉션
+        response.writeHead(302, { Location: `/?id=${title}` });
+        response.end('did it');
+      });
+    });
+    //파일형태로 저장하기
   } else {
     //200은 전송 성공. 404은 실패
     response.writeHead(404);
