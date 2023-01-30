@@ -9,14 +9,17 @@ function templateHTML(title, list, body, ctrl) {
   <!doctype html>
   <html>
   <head>
-  <title>WEB1 - ${title}</title>
+  <title>WEB - ${title}</title>
   <meta charset="utf-8">
+  <style>
+  *{font-family:inherit;box-sizing:border-box}
+  html{font-family:'나눔스퀘어',Noto Sans KR ,'돋움', sans-serif;font-size:18px;word-break:keep-all;}  
+  </style>
   </head>
   <body>
   <h1><a href="/">WEB</a></h1>
   ${list}
   ${body}
-
   </body>
   </html>
   `;
@@ -51,7 +54,7 @@ var app = http.createServer(function (request, response) {
           list,
           `<h2>${title}</h2>
           <div>${description}</div>
-         
+
           <a href="/create">CREATE</a>
           `
         );
@@ -70,6 +73,11 @@ var app = http.createServer(function (request, response) {
             <div>${description}</div>
             <a href="/create">CREATE</a>
             <a href="/update?id=${title}">UPDATE</a>
+            <form style="display:inline" action="./delete_process" method="post" onsubmit="confirm('정말이니?')">
+            <input type="hidden" name="id" value="${title}">
+            <input type="submit" value="DELETE" style="display:inline;border:0;background:none;font-size:1em;text-decoration:underline;cursor:pointer;">
+            </form>
+
             `
           );
           response.writeHead(200);
@@ -86,7 +94,6 @@ var app = http.createServer(function (request, response) {
         title,
         list,
         `
-        <style>*{font-family:inherit;width:100%;box-sizing:border-box}</style>
         <form action="/process_create" method="post" style="max-width:300px;">
           <p><input type="text" name="title" placeholder="title"/></p>
           <p>
@@ -128,11 +135,10 @@ var app = http.createServer(function (request, response) {
         var template = templateHTML(
           title,
           list,
-          `          
-          <style>*{font-family:inherit;width:100%;box-sizing:border-box}</style>
+          `
+          <p style="font-size:0.8em">submit했을때 목적지를 (어떤 파일을 수정할것인가) 알기위해서 수정하지않을 input[type="hidden"]을 하나 남긴다</p>
           <form action="/update_process" method="post" style="max-width:300px;">
           <input type="hidden" name="id" value="${title}">
-          /* submit했을때 목적지를 (어떤 파일을 수정할것인가) 알기위해서 수정하지않을 input[type="hidden"]을 하나 남긴다 */
           <p><input type="text" name="title" placeholder="title" value="${title}"/></p>
           <p>
           <textarea rows="30" name="description" placeholder="description">${description}</textarea>
@@ -161,6 +167,20 @@ var app = http.createServer(function (request, response) {
           response.writeHead(302, { Location: `/?id=${title}` });
           response.end();
         });
+      });
+    });
+  } else if (pathname === '/delete_process') {
+    var body = '';
+    request.on('data', function (data) {
+      body = body + data;
+    });
+    request.on('end', function () {
+      var post = qs.parse(body);
+      var id = post.id;
+      //삭제하기
+      fs.unlink(`data/${id}`, function (error) {
+        response.writeHead(302, { Location: `/` });
+        response.end();
       });
     });
   } else {
