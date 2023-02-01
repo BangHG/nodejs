@@ -3,35 +3,7 @@ var fs = require('fs');
 var url = require('url'); // url모듈
 var qs = require('querystring');
 
-var template = {
-  HTML: function (title, list, body, ctrl) {
-    return `
-    <!doctype html>
-    <html>
-      <head>
-        <title>WEB - ${title}</title>
-        <meta charset="utf-8">
-        <style> *{font-family:inherit;box-sizing:border-box} html{font-family:'NanumSquare',Noto Sans KR ,'돋움', sans-serif;font-size:18px;word-break:keep-all;} form input:not([type=hidden],[value="DELETE"]),form textarea{width:100%} </style>        
-      </head>
-      <body>
-        <h1><a href="/">WEB</a></h1>
-        ${list}
-        ${body}
-      </body>
-    </html>
-    `;
-  },
-  List: function (filelist) {
-    var list = '<ul>';
-    var i = 0;
-    while (i < filelist.length) {
-      list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
-      i = i + 1;
-    }
-    list = list + '</ul>';
-    return list;
-  },
-};
+var template = require('./lib/template.js');
 
 var app = http.createServer(function (request, response) {
   var _url = request.url;
@@ -70,7 +42,7 @@ var app = http.createServer(function (request, response) {
             <div>${description}</div>
             <a href="/create">CREATE</a>
             <a href="/update?id=${title}">UPDATE</a>
-            <form style="display:inline" action="./delete_process" method="post" onsubmit="confirm('정말이니?')">
+            <form style="display:inline" action="./delete_process" method="post" onsubmit="if(confirm('진짜로?')){}else{return false}">
             <input type="hidden" name="id" value="${title}">
             <input type="submit" value="DELETE" style="display:inline;border:0;background:none;font-size:1em;text-decoration:underline;cursor:pointer;">
             </form>
